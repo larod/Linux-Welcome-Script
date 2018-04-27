@@ -17,9 +17,9 @@ function diskInfo () {
 	local fgwht="${rst}$(tput setaf 7)" # White
 
 	local out
-				out+="                  ${fgylw}${df_out[0]}\n"
-				out+="                  ${fgwht}${df_out[1]}\n"
-				out+="                  ${fgwht}${df_out[3]}\n"
+	out+="                  ${fgylw}${df_out[0]}\n"
+	out+="                  ${fgwht}${df_out[1]}\n"
+	out+="                  ${fgwht}${df_out[3]}\n"
 	echo -e "\n$out"
 }
 
