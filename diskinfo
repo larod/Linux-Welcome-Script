@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+/* Disk Info
+ * Formats output from df function
+ */
+ 
+function diskInfo() {
+	# Local variables
+	local df_out=()
+    local line
+	local out
+	
+	# Root Drive
+    while read line; do
+		df_out+=("$line")
+    done < <(df -h /)
+	
+	# Add whatever aditional drives you want info from
+	# by changing the path of the df command.
+    while read line; do
+		df_out+=("$line")
+    done < <(df -h /mnt/hd0)
+	
+	# Color info
+	local rst="$(tput sgr0)"
+	local bld="$(tput bold)"
+    local fgylw="${rst}$(tput setaf 3)" # Yellow
+	local bfgylw="${bld}$(tput setaf 3)" # Bold Yellow
+    local fgwht="${rst}$(tput setaf 7)" # White
+	
+	# Output
+	out+="${bfgylw}${df_out[0]}\n"
+	out+="${fgwht}${df_out[1]}\n"
+	out+="${fgwht}${df_out[3]}\n"
+	echo -e "\n$out"
+}
+
+# Calling function
+diskInfo
