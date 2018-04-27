@@ -50,17 +50,17 @@ function welcome {
 	read one five fifteen rest < /proc/loadavg
 
 	echo "$(tput setaf 2)
-	    .~~.   .~~.    `date +"%A, %e %B %Y, %r"`
-	   '. \ ' ' / .'   `uname -srmo`$(tput setaf 1)
-	    .~ .~~~..~.    
-	   : .~.'~'.~. :   Uptime.............: ${UPTIME}
+      .~~.   .~~.    `date +"%A, %e %B %Y, %r"`
+     '. \ ' ' / .'   `uname -srmo`$(tput setaf 1)
+      .~ .~~~..~.    
+     : .~.'~'.~. :   Uptime.............: ${UPTIME}
     ~ (   ) (   ) ~  Memory.............: `cat /proc/meminfo | grep MemFree | awk {'print $2'}`kB (Free) / `cat /proc/meminfo | grep MemTotal | awk {'print $2'}`kB (Total)
    ( : '~'.~.'~' : ) Load Averages......: ${one}, ${five}, ${fifteen} (1, 5, 15 min)
     ~ .~ (   ) ~. ~  Running Processes..: `ps ax | wc -l | tr -d " "`
-	   (  : '~' :  )   PI Address.........: `ipnfo`
-	    '~ .~~~. ~'    VPN Address........: `ipnfo vpn`
-		      '~'        Temperature........: CPU: $cpuTempC°C/$cpuTempF°F GPU: $gpuTempC°C/$gpuTempF°F
-		                                      `diskInfo`
+     (  : '~' :  )   PI Address.........: `ipnfo`
+      '~ .~~~. ~'    VPN Address........: `ipnfo vpn`
+	  '~'        Temperature........: CPU: $cpuTempC°C/$cpuTempF°F GPU: $gpuTempC°C/$gpuTempF°F
+		                          `diskInfo`
 	$(tput sgr0)"
 }
 # PI SERVER PROFILE END
