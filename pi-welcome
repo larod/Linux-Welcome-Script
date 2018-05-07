@@ -79,7 +79,7 @@ function welcome () {
   ( : '~'.~.'~' : ) Load Averages......: ${one}, ${five}, ${fifteen} (1, 5, 15 min)
    ~ .~ (   ) ~. ~  Running Processes..: `ps ax | wc -l | tr -d " "`
     (  : '~' :  )   PI Address.........: `ipInfo`
-     '~ .~~~. ~'    VPN Address........: `ipInfo vpn`
+     '~ .~~~. ~'    VPN Address........: `ipInfo vpn` # IF NO SPLIT VPN IS PRESENT THIS LINE CAN BE ELIMINATED.
          '~'        Temperature........: CPU: $cpuTempC°C/$cpuTempF°F GPU: $gpuTempC°C/$gpuTempF°F
   		                       `mountInfo`
   	     $(tput sgr0)"
