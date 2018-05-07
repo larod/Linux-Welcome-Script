@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+# WELCOME START
+function ipInfo () {
+	if [ "$1" ]; then
+		sudo -u "$1" -i -- curl -s ipinfo.io | \
+		awk 'NR == 2 { gsub("\"","") gsub(",",""); printf $2 ":" } \
+		NR == 6 { gsub("\"","") gsub(",",""); print $2 }'
+	else
+		curl -s ipinfo.io | \
+	        awk 'NR == 2 { gsub("\"","") gsub(",",""); printf $2 ":" } \
+			NR == 6 { gsub("\"","") gsub(",",""); print $2 }'
+	fi
+}
+
+function logo() {
+	# UPTIME
+	local upSeconds="$(/usr/bin/cut -d. -f1 /proc/uptime)"
+	local secs=$((${upSeconds}%60))
+	local mins=$((${upSeconds}/60%60))
+	local hours=$((${upSeconds}/3600%24))
+	local days=$((${upSeconds}/86400))
+	local UPTIME=`printf "%d days, %02dh%02dm%02ds" "$days" "$hours" "$mins" "$secs"`
+
+	# LOAD AVG
+	read one five fifteen rest < /proc/loadavg
+
+	# COLORS
+	local rst="$(tput sgr0)"
+	local bld="$(tput bold)"
+	local c1="${rst}$(tput setaf 7)" # White
+	local c2="${rst}$(tput setaf 1)" # Red
+	local c3="${bld}$(tput setaf 3)" # Bold Yellow
+	local c4="${rst}$(tput setaf 3)" # Yellow
+
+	# STORAGE
+	local df_out=()
+        local line
+
+        while read line; do
+                df_out+=("$line")
+        done < <(df -h /)
+        
+        # THIS CODE CAN BE REPEATED FOR EACH HD
+        while read line; do
+                df_out+=("$line")
+        done < <(df -h /mnt/hd0)
+        
+	# END STORAGE
+
+	local logo=(
+	"${c2}                          ./+o+-      "
+	"${c1}                  yyyyy- ${c2}-yyyyyy+     `date +"%A, %e %B %Y, %r"`"
+	"${c1}               ${c1}://+//////${c2}-yyyyyyo     `uname -srmo`"
+	"${c3}           .++ ${c1}.:/++++++/-${c2}.+sss/\`     "
+	"${c3}         .:++o:  ${c1}/++++++++/:--:/-     Uptime.............: ${UPTIME}"
+	"${c3}        o:+o+:++.${c1}\`..\`\`\`.-/oo+++++/    Memory.............: `cat /proc/meminfo | grep MemFree | awk {'print $2'}`kB (Free) / `cat /proc/meminfo | grep MemTotal | awk {'print $2'}`kB (Total)"
+	"${c3}       .:+o:+o/.${c1}          \`+sssoo+/   Load Averages......: ${one}, ${five}, ${fifteen} (1, 5, 15 min)"
+	"${c1}  .++/+:${c3}+oo+o:\`${c1}             /sssooo.  Running Processes..: `ps ax | wc -l | tr -d " "`"
+	"${c1} /+++//+:${c3}\`oo+o${c1}               /::--:.  PI Address.........: `ipInfo`"
+	"${c1} \+/+o+++${c3}\`o++o${c2}               ++////.  ${c1}VPN Address........: `ipInfo vpn`" # REMOVE THIS IF THERE IS NO SPLIT VPN
+	"${c1}  .++.o+${c3}++oo+:\`${c2}             /dddhhh.  "
+	"${c3}       .+.o+oo:.${c2}          \`oddhhhh+   ${c4}${df_out[0]}"
+	"${c3}        \+.++o+o\`${c2}\`-\`\`\`\`.:ohdhhhhh+    ${c1}${df_out[1]}"
+	"${c3}         \`:o+++ ${c2}\`ohhhhhhhhyo++os:     " # MORE DISK ENTRIES CAN BE INCLUDED HERE AND BELOW
+	"${c3}           .o:${c2}\`.syhhhhhhh/${c3}.oo++o\`     "
+	"${c2}               /osyyyyyyo${c3}++ooo+++/    "
+	"${c2}                   \`\`\`\`\` ${c3}+oo+++o\:    "
+	"${c3}                          \`oo++.      ")
+
+	local out
+	local i
+
+	for i in "${!logo[@]}"; do
+        	out+="${logo[$i]}\n"
+    	done
+    echo -e "\n$out"
+}
+
+logo
