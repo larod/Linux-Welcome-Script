@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+function ipInfo () {
+	if [ "$1" ]; then
+		sudo -u "$1" -i -- curl -s ipinfo.io | \
+		awk 'NR == 2 { gsub("\"","") gsub(",",""); printf $2 ":" } \
+		NR == 6 { gsub("\"","") gsub(",",""); print $2 }'
+	else
+		curl -s ipinfo.io | \
+	        awk 'NR == 2 { gsub("\"","") gsub(",",""); printf $2 ":" } \
+			NR == 6 { gsub("\"","") gsub(",",""); print $2 }'
+	fi
+}
+
+function mountInfo () {
+	local df_out=()
+	local line
+
+	while read line; do
+		df_out+=("$line")
+	done < <(df -hT | grep -e Filesystem -e /dev/root -e /dev/sda1 -e 192.168.1.100)
+
+	local bld="$(tput bold)"
+	local rst="$(tput sgr0)"
+	local fgylw="${rst}$(tput setaf 3)" # Yellow
+	local fgwht="${rst}$(tput setaf 7)" # White
+	local bfgylw="${bld}$(tput setaf 3)"
+
+	local i=0
+	local out
+
+	for output in "${df_out[@]}"
+	do
+		if [ $i -eq 0 ]; then
+			out+="                  ${bfgylw}$output\n"
+		else
+			out+="                  ${fgwht}$output\n"
+		fi
+		((i++))
+	done
+
+	echo -e "\n$out"
+}
+
+function welcome () {
+  local upSeconds="$(/usr/bin/cut -d. -f1 /proc/uptime)"
+  local secs=$((${upSeconds}%60))
+  local mins=$((${upSeconds}/60%60))
+  local hours=$((${upSeconds}/3600%24))
+  local days=$((${upSeconds}/86400))
+  local UPTIME=`printf "%d days, %02dh%02dm%02ds" "$days" "$hours" "$mins" "$secs"`
+
+  # CALCULATE CPU AND GPU TEMP
+  if [[ -f "/sys/class/thermal/thermal_zone0/temp" ]]; then
+  	cpuTempC=$(($(cat /sys/class/thermal/thermal_zone0/temp)/1000)) && cpuTempF=$((cpuTempC*9/5+32))
+  fi
+
+  if [[ -f "/opt/vc/bin/vcgencmd" ]]; then
+  	if gpuTempC=$(/opt/vc/bin/vcgencmd measure_temp); then
+  		gpuTempC=${gpuTempC:5:2}
+  		gpuTempF=$((gpuTempC*9/5+32))
+  	else
+  		gpuTempC=""
+  	fi
+  fi
+  # END CALCULATE CPU AND GPU TEMP
+
+  # LOAD AVG
+  read one five fifteen rest < /proc/loadavg
+  clear
+
+  # PRINT INFO
+  echo "$(tput setaf 2)
+     .~~.   .~~.    `date +"%A, %e %B %Y, %r"`
+    '. \ ' ' / .'   `uname -srmo`$(tput setaf 1)
+     .~ .~~~..~.
+    : .~.'~'.~. :   Uptime.............: ${UPTIME}
+   ~ (   ) (   ) ~  Memory.............: `cat /proc/meminfo | grep MemFree | awk {'print $2'}`kB (Free) / `cat /proc/meminfo | grep MemTotal | awk {'print $2'}`kB (Total)
+  ( : '~'.~.'~' : ) Load Averages......: ${one}, ${five}, ${fifteen} (1, 5, 15 min)
+   ~ .~ (   ) ~. ~  Running Processes..: `ps ax | wc -l | tr -d " "`
+    (  : '~' :  )   PI Address.........: `ipInfo`
+     '~ .~~~. ~'    VPN Address........: `ipInfo vpn`
+         '~'        Temperature........: CPU: $cpuTempC°C/$cpuTempF°F GPU: $gpuTempC°C/$gpuTempF°F
+  		                       `mountInfo`
+  	     $(tput sgr0)"
+  # PI SERVER PROFILE END
+}
+welcome
